@@ -18,8 +18,8 @@ _prefix=/usr
 
 pkgbase=kodi-c1-fb
 pkgname=('kodi-c1-fb' 'kodi-c1-eventclients-fb')
-_commit=3a59f4b03708451273668022f415123522f634fd
-pkgver=15.2.20151030
+_commit=16.0b2-Jarvis
+pkgver=16.0.20151123
 pkgrel=1
 _codename=unknown
 arch=('armv7h')
@@ -33,17 +33,21 @@ makedepends=(
     'libxrandr' 'libxslt' 'lzo' 'nasm' 'nss-mdns' 'python2-pillow' 'aml-libs-c1' 
     'python2-pybluez' 'python2-simplejson' 'rtmpdump' 'sdl2' 'sdl_image' 
     'shairplay' 'smbclient' 'swig' 'taglib' 'tinyxml' 'unzip' 'upower' 'yajl' 
-    'zip'
+    'zip' 'dcadec-git' 'libcrossguid-git'
 )
-source=("https://github.com/Owersun/xbmc/archive/${_commit}.tar.gz"
+source=("https://github.com/xbmc/xbmc/archive/${_commit}.tar.gz"
         "git+https://github.com/mdrjr/c1_mali_libs.git"
+        'odroid-platform.patch'
+        '0014-aml-Remove-dependency-on-libamplayer-and-amffmpeg.patch'
         'kodi.service'
         'polkit.rules'
         'kodi_permissions.conf'
         '20-quiet-printk.conf')
 
-sha256sums=('96200ef955a65f9fa87a66b27b4374a2badd89d9a1d20c02f6fdca760f35a3ca'
+sha256sums=('b71f41f0786cb0e47c3f97c9ee18260488bdbc9565e3b8014d9b6d000ca53d6c'
             'SKIP'
+            '7aa09dd4ea776ec622848dc3d5d4f0bf3b64820038e0b6807f2876eaba01e9b4'
+            '6b5c36b14d8069b3ab78f672ff2c84ebd697eefc156ae7dca4a3965b9fe8ce47'
             '79aa17b475967d97b6c72c850b638705d6feb6d995844476b65d68d33d161114'
             'c68ed2bd377f80b606b8815d78239b9132b479eafc1d19797cee5824debe1800'
             'ecc413a1cfd4622b79de16010c9d8d269f774ad89d2e547553e36fbd236e8593'
@@ -51,6 +55,14 @@ sha256sums=('96200ef955a65f9fa87a66b27b4374a2badd89d9a1d20c02f6fdca760f35a3ca'
 
 prepare() {
   cd xbmc-${_commit}
+
+  # Add ODROID platform
+  patch -p1 < "${srcdir}/odroid-platform.patch"
+
+  # Add support for libamcodec.so instead of libamplayer.so
+  patch -p1 < "${srcdir}/0014-aml-Remove-dependency-on-libamplayer-and-amffmpeg.patch"
+
+  # Use Python 2 instead of Python 3
   find -type f -name *.py -exec sed 's|^#!.*python$|#!/usr/bin/python2|' -i "{}" +
   sed 's|^#!.*python$|#!/usr/bin/python2|' -i tools/depends/native/rpl-native/rpl
   sed 's/python/python2/' -i tools/Linux/kodi.sh.in

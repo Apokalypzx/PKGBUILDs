@@ -1,0 +1,34 @@
+From 9d72ff9f149d052f2935be12b0eb717c5c5bb507 Mon Sep 17 00:00:00 2001
+From: Jan Holthuis <jan.holthuis@ruhr-uni-bochum.de>
+Date: Mon, 16 Nov 2015 14:21:12 +0100
+Subject: [PATCH] [AMLUtils] Add support for ODROID-C1(+)
+
+Hardkernel's ODROID-C1 (and its successor ODROID-C1+) are both
+single board computers that feature an Amlogic S805 / Meson8B chipset.
+
+Currently, they aren't recognized as Meson8B devices since they're
+missing "Meson8B" as Hardware identifier in /proc/cpuinfo and go with
+"ODROIDC" instead:
+
+    $ cat /proc/cpuinfo | grep Hardware
+    Hardware : ODROIDC
+
+This simple patch fixes this issue by adding "ODROIDC" as a valid
+identifier for AML_DEVICE_TYPE_M8B.
+---
+ xbmc/utils/AMLUtils.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
+index 7f7ab62..bff3f4e 100644
+--- a/xbmc/utils/AMLUtils.cpp
++++ b/xbmc/utils/AMLUtils.cpp
+@@ -174,7 +174,7 @@ enum AML_DEVICE_TYPE aml_get_device_type()
+         aml_device_type = AML_DEVICE_TYPE_M8M2;
+       else
+         aml_device_type = AML_DEVICE_TYPE_M8;
+-    } else if (cpu_hardware.find("Meson8B") != std::string::npos)
++    } else if ((cpu_hardware.find("Meson8B") != std::string::npos) || (cpu_hardware.find("ODROIDC") != std::string::npos))
+       aml_device_type = AML_DEVICE_TYPE_M8B;
+     else
+       aml_device_type = AML_DEVICE_TYPE_UNKNOWN;
